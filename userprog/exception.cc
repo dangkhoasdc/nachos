@@ -56,9 +56,9 @@ ExceptionHandler(ExceptionType which)
     {
 	case SyscallException:
 		switch (type):
-		case SC_halt:
-		DEBUG('a', "Shutdown, initiated by user program.\n");
-   		interrupt->Halt();
+			case SC_halt:
+			DEBUG('a', "Shutdown, initiated by user program.\n");
+   			interrupt->Halt();
 		break;
     }
 
