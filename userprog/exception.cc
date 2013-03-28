@@ -59,12 +59,42 @@ ExceptionHandler(ExceptionType which)
 			case SC_halt:
 			DEBUG('a', "Shutdown, initiated by user program.\n");
    			interrupt->Halt();
+			break;
+    // Advance program counters.
+    machine->registers[PrevPCReg] = machine->registers[PCReg];	// for debugging, in case we
+						// are jumping into lala-land
+    machine->registers[PCReg] = machine->registers[NextPCReg];
+    machine->registers[NextPCReg] += 4;
 		break;
-    }
-
-    if ((which == SyscallException) && (type == SC_Halt)) {
+	case  PageFaultException:    // No valid translation found
+		printf("No valid translation found %d %d\n", which, type);
+		ASSERT(FALSE);
+		break;
+	case  ReadOnlyException:     // Write attempted to page marked 
+		printf("Write attempted tp page marked %d %d\n", which, type);
+		ASSERT(FALSE);
+		break;
+	case  BusErrorException:     // Translation resulted in an 
+		printf("Translaion resulted in an %d %d\n", which, type);
+		ASSERT(FALSE);
+		break;
+	case  AddressErrorException: // Unaligned reference or one that
+		printf("Unaligned reference or one that %d %d\n", which, type);
+		ASSERT(FALSE);
+		break;
+	case  OverflowException:     // Integer overflow in add or sub.
+		printf("Integer overflow in add or sub %d %d\n", which, type);
+		ASSERT(FALSE);
+		break;
+	case  IllegalInstrException: // Unimplemented or reserved instr.
+		printf("Unimplemented or reserved instr %d %d\n", which, type);
+		ASSERT(FALSE);
+		break;
+   }
+		/*Old exception struct*/
+    /*if ((which == SyscallException) && (type == SC_Halt)) {
     } else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);
-    }
+    }*/
 }
