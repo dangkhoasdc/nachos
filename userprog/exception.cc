@@ -48,14 +48,15 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 #define MAX_INT_LENGTH 9
+#define MASK_GET_NUM 0xF
 void
 ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
     switch (which)
     {
-	case SyscallException:
-		switch (type):
+		case SyscallException:
+		switch (type)
 			{
 				case SC_Halt:
 					DEBUG('a', "Shutdown, initiated by user program.\n");
@@ -66,11 +67,12 @@ ExceptionHandler(ExceptionType which)
 					and return it*/
 					DEBUG('a', "Read integer number from console.\n");
 					int number = 0;
+					int nDigit = 0;
 					char* buffer = new char[MAX_INT_LENGTH];
-					gSynchConsole->Read(buffer, MAX_INT_LENGTH);
-					for (unsigned int i = 0; i < MAX_INT_LENGTH; ++i)
+					nDigit = gSynchConsole->Read(buffer, MAX_INT_LENGTH);
+					for (unsigned int i = 0; i < nDigit; ++i)
 					{
-						number = number*10 + (int) buffer[i];
+						number = number*10 + (int) (buffer[i] & MASK_GET_NUM);
 					}
 					machine->WriteRegister(2, number);
 					printf("The number is %d", number);
