@@ -47,7 +47,7 @@
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	are in machine.h.
 //----------------------------------------------------------------------
-
+#define MAX_INT_LENGTH 9
 void
 ExceptionHandler(ExceptionType which)
 {
@@ -56,10 +56,26 @@ ExceptionHandler(ExceptionType which)
     {
 	case SyscallException:
 		switch (type):
-			case SC_halt:
-			DEBUG('a', "Shutdown, initiated by user program.\n");
-   			interrupt->Halt();
-			break;
+			{
+				case SC_Halt:
+					DEBUG('a', "Shutdown, initiated by user program.\n");
+   				interrupt->Halt();
+				break;
+				case SC_ReadInt:
+				/*Read integer number 
+					and return it*/
+					DEBUG('a', "Read integer number from console.\n");
+					int number = 0;
+					char* buffer = new char[MAX_INT_LENGTH];
+					gSynchConsole->Read(buffer, MAX_INT_LENGTH);
+					for (unsigned int i = 0; i < MAX_INT_LENGTH; ++i)
+					{
+						number = number*10 + (int) buffer[i];
+					}
+					machine->WriteRegister(2, number);
+					printf("The number is %d", number);
+				break;
+			}
     // Advance program counters.
     machine->registers[PrevPCReg] = machine->registers[PCReg];	// for debugging, in case we
 						// are jumping into lala-land

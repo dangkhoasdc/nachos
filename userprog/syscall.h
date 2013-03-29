@@ -29,7 +29,7 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
-
+#define SC_ReadInt 11
 #ifndef IN_ASM
 
 /* The system call interface.  These are the operations the Nachos
@@ -123,7 +123,8 @@ void Fork(void (*func)());
  * or not. 
  */
 void Yield();		
-
+/*Read integer number from console*/
+int ReadInt();
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */
