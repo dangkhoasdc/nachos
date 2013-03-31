@@ -47,10 +47,7 @@
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	are in machine.h.
 //----------------------------------------------------------------------
-#define MAX_INT_LENGTH 9
-#define MASK_GET_NUM 0xF
-#define LIMIT 255
-ExceptionHandler(ExceptionType which)
+void ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
     switch (which)
@@ -63,6 +60,7 @@ ExceptionHandler(ExceptionType which)
    				interrupt->Halt();
 				break;
 				case SC_ReadInt:
+				{
 				/*Read integer number 
 					and return it*/
 					DEBUG('a', "Read integer number from console.\n");
@@ -80,8 +78,10 @@ ExceptionHandler(ExceptionType which)
 					machine->WriteRegister(2, number);
 					/*printf("The number is %d", number);*/
 					delete buffer;
+				}
 				break;
 				case SC_PrintInt:
+				{
 					char s[MAX_INT_LENGTH], neg, tmp;
 					neg = '-';
 					int i, n, mid, sz;
@@ -106,38 +106,49 @@ ExceptionHandler(ExceptionType which)
 						s[i] = tmp;
 					}
 					gSynchConsole->Write(s, sz);
+				}
 				break;
 				case SC_PrintChar:
+				{
 					char ch;
 					ch = (char) machine->ReadRegister(4);
 					gSynchConsole->Write(&ch, 1);
+				}
 				break;
 				case SC_ReadChar:
+				{
 					int sz;
 					char buff[MAX_INT_LENGTH];
 					sz = gSynchConsole->Read(buff, MAX_INT_LENGTH);
 					machine->WriteRegister(2, buff[sz-1]);
+				}
 				break;
 				case SC_PrintString:
+				{
+					int buffAddr = machine->ReadRegister(2);
 					int length = machine->ReadRegister(5);
 					int i = 0;
-					char* buff = machine->User2System(buffAddr, LIMIT);
+					char *buff = new char[LIMIT];
+					buff = machine->User2System(buffAddr, LIMIT);
 					while (buff[i] != 0 && buff[i] != '\n')
 					{
 						gSynchConsole->Write(buff+i, 1);
 						i++;
-					};
+					}
 					buff[i] = '\n';
 					gSynchConsole->Write(buff+i,1);
+				}
 				break;
 				case SC_ReadString:
+				{
 					char *buff = new char[LIMIT];
-					if (buff == NULL) break;
+					
 					int length = machine->ReadRegister(5);
 					int buffAddrUser = machine->ReadRegister(4);
-					gSynchConsole->Read(buffer, length);
-					machine->System2User(buffAddrUser, length, buffer);
-					int i = 0;
+					gSynchConsole->Read(buff, length);
+					machine->System2User(buffAddrUser, length, buff);
+					if (buff == 0) break;
+				}
 				break;
 			}
     // Advance program counters.

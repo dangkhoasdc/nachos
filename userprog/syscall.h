@@ -14,6 +14,9 @@
 #define SYSCALLS_H
 
 #include "copyright.h"
+#define MAX_INT_LENGTH 9
+#define MASK_GET_NUM 0xF
+#define LIMIT 255
 
 /* system call codes -- used by the stubs to tell the kernel which system call
  * is being asked for
@@ -138,9 +141,9 @@ char ReadChar();
 /*Print character number to console*/
 void PrintChar(char _ch);
 /*Read string from console*/
-void ReadString(char[] buff, int length);
+void ReadString(char buff[], int length);
 /*Print string  number to console*/
-void PrintChar(char[] buff);
+void PrintString(char buff[]);
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

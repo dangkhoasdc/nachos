@@ -212,7 +212,7 @@ void Machine::WriteRegister(int num, int value)
 	registers[num] = value;
     }
 
-char* User2System(int virtaddr, int limit)
+char* Machine::User2System(int virtAddr, int limit)
 {
 	int i;
 	int ch;
@@ -230,14 +230,14 @@ char* User2System(int virtaddr, int limit)
 	}
 	return kernelBuf;
 }
-int  System2User(int virtaddr, int len, char* buffer)
+int  Machine::System2User(int virtAddr, int len, char* buffer)
 {
 	if (len < 0) return -1;
 	if (len == 0) return len;
 	int i = 0;
 	int ch = 0;
 	do {
-		oneChar = (int) buffer[i];
+		ch = (int) buffer[i];
 		machine->WriteMem(virtAddr+i, 1, ch);
 		i++;
 	} while (i<len && ch != 0);
