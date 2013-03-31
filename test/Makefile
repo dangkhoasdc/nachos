@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort readint
+all: halt shell matmult sort readint PrintInt string help ascii bubblesort 
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -70,3 +70,35 @@ readint.o: readint.c
 readint: readint.o start.o
 	$(LD) $(LDFLAGS) start.o readint.o -o readint.coff
 	../bin/coff2noff readint.coff readint
+
+PrintInt.o: PrintInt.c
+	$(CC) $(CFLAGS) -c PrintInt.c
+PrintInt: PrintInt.o start.o
+	$(LD) $(LDFLAGS) start.o PrintInt.o -o PrintInt.coff
+	../bin/coff2noff PrintInt.coff PrintInt 
+
+string.o: string.c
+	$(CC) $(CFLAGS) -c string.c
+string: string.o start.o
+	$(LD) $(LDFLAGS) start.o string.o -o string.coff
+	../bin/coff2noff string.coff string
+	
+
+help.o: help.c
+	$(CC) $(CFLAGS) -c help.c
+help: help.o start.o
+	$(LD) $(LDFLAGS) start.o help.o -o help.coff
+	../bin/coff2noff help.coff help
+
+bubblesort.o: bubblesort.c
+	$(CC) $(CFLAGS) -c bubblesort.c
+bubblesort: bubblesort.o start.o
+	$(LD) $(LDFLAGS) start.o bubblesort.o -o bubblesort.coff
+	../bin/coff2noff bubblesort.coff bubblesort 
+
+ascii.o: ascii.c
+	$(CC) $(CFLAGS) -c ascii.c
+ascii: ascii.o ascii.o
+	$(LD) $(LDFLAGS) start.o ascii.o -o ascii.coff
+	../bin/coff2noff ascii.coff ascii
+

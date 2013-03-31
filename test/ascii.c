@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  PrintInt.c
+ *       Filename:  ascii.c
  *
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  03/31/2013 06:32:50 AM
+ *        Created:  04/01/2013 03:24:00 AM
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -19,11 +19,13 @@
 #include "copyright.h"
 int main()
 {
-	int n;
-	PrintString("Nhap 1 so:");
-	n = ReadInt();
-	PrintString("So vua nhap:");
-	PrintInt(n); // Test the PrintInt function: print 100 to console.
-	return 0;
+	char i = 32;
+	for (; i < 127; i++)
+	{
+		PrintInt((int)i);
+		PrintChar(':');
+		PrintChar(i);
+		PrintChar('\n');
+	}
 }
 

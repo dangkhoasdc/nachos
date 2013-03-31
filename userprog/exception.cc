@@ -74,9 +74,8 @@ void ExceptionHandler(ExceptionType which)
 					{
 						number = number*10 + (int) (buffer[i] & MASK_GET_NUM);
 					}
-					number = buffer[0] == '-' ? -number : number;
+					number = buffer[0] == '-' ? -1*number : number;
 					machine->WriteRegister(2, number);
-					/*printf("The number is %d", number);*/
 					delete buffer;
 				}
 				break;
@@ -99,7 +98,7 @@ void ExceptionHandler(ExceptionType which)
 					sz = i;
 					s[sz] = '\n';
 					mid = i / 2;
-					while (i-->=mid)
+					while (i-->mid)
 					{
 						tmp = s[sz-i-1];
 						s[sz-i-1] = s[i];
@@ -112,9 +111,10 @@ void ExceptionHandler(ExceptionType which)
 				{
 					char ch;
 					ch = (char) machine->ReadRegister(4);
+					//printf("ch = %c",ch);
 					gSynchConsole->Write(&ch, 1);
+					break;
 				}
-				break;
 				case SC_ReadChar:
 				{
 					int sz;
@@ -125,8 +125,7 @@ void ExceptionHandler(ExceptionType which)
 				break;
 				case SC_PrintString:
 				{
-					int buffAddr = machine->ReadRegister(2);
-					int length = machine->ReadRegister(5);
+					int buffAddr = machine->ReadRegister(4);
 					int i = 0;
 					char *buff = new char[LIMIT];
 					buff = machine->User2System(buffAddr, LIMIT);
@@ -137,17 +136,18 @@ void ExceptionHandler(ExceptionType which)
 					}
 					buff[i] = '\n';
 					gSynchConsole->Write(buff+i,1);
+					delete buff;
 				}
 				break;
 				case SC_ReadString:
 				{
 					char *buff = new char[LIMIT];
-					
+					if (buff == 0) break;
 					int length = machine->ReadRegister(5);
 					int buffAddrUser = machine->ReadRegister(4);
-					gSynchConsole->Read(buff, length);
-					machine->System2User(buffAddrUser, length, buff);
-					if (buff == 0) break;
+					int sz = gSynchConsole->Read(buff, length);
+					machine->System2User(buffAddrUser, sz, buff);
+					delete buff;
 				}
 				break;
 			}

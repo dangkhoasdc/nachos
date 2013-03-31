@@ -253,3 +253,35 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
     DEBUG('a', "phys addr = 0x%x\n", *physAddr);
     return NoException;
 }
+char* Machine::User2System(int virtAddr, int limit)
+{
+	int i;
+	int ch;
+	char* kernelBuf = NULL;
+	kernelBuf = new char[limit+1];
+	if (kernelBuf == NULL)
+	{
+		return kernelBuf;
+	}
+	memset(kernelBuf,0, limit+1);
+	for (i = 0; i < limit; ++i)
+	{
+		ReadMem(virtAddr+i, 1, &ch);
+		kernelBuf[i] = ch;
+		if (ch == 0) break;
+	}
+	return kernelBuf;
+}
+int  Machine::System2User(int virtAddr, int len, char* buffer)
+{
+	if (len < 0) return -1;
+	if (len == 0) return len;
+	int i = 0;
+	int ch = 0;
+	do {
+		ch = (int) buffer[i];
+		WriteMem(virtAddr+i, 1, ch);
+		i++;
+	} while (i<len && ch != 0);
+	return i;
+}

@@ -146,6 +146,8 @@ PrintInt:
 	j $31
 	.end PrintInt
 
+	.globl ReadChar
+	.end ReadChar
 ReadChar:
 	addiu $2, $0,SC_ReadChar
 	syscall
@@ -160,6 +162,8 @@ PrintChar:
 	j $31
 	.end PrintChar
 
+	.globl ReadString
+	.ent ReadString
 ReadString:
 	addiu $2, $0,SC_ReadString
 	syscall

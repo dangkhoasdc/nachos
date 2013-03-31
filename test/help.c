@@ -19,12 +19,10 @@
 #include "copyright.h"
 int main()
 {
-	char intro[] = "Chao cac ban den voi nachOS\n";
-	char ascii[] = "Chuong trinh ascii dung de in cac ki tu trong ma ASCII tu ki tu 32 tro di\n";
-	char sort[] = "Chuong trinh sort dung de sap xep cac so";
-	PrintString(intro);
-	PrintString(ascii);
-	PrintString(sort);
+	PrintString("Chao mung cac ban den voi nachos\n");
+	PrintString("ascii: Chuong trinh hien bang ma ASCII\n");
+	PrintString("bublesort: Chuong trinh sap xep buble sort\n");
+	
 	return 0;
 }
 
