@@ -117,8 +117,21 @@ class Machine {
 
     void WriteRegister(int num, int value);
 				// store a value into a CPU register
-
-
+		/*copy buffer from user to system*/
+//		input: 
+//			-userspace address : int
+//			-limit of buffer: int
+//		output: 
+//			-buffer: char* 
+		char* User2System(int virtaddr, int limit);
+		/*copy buffer from system to user*/
+//		input: 
+//			-userspace address : int
+//			-limit of buffer: int
+//			- buffer: char[]
+//		output: 
+//			-number of bytes copied: char* 
+		int  System2User(int virtaddr, int len, char* buffer);
 // Routines internal to the machine simulation -- DO NOT call these 
 
     void OneInstruction(Instruction *instr); 	

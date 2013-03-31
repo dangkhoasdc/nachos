@@ -49,7 +49,7 @@
 //----------------------------------------------------------------------
 #define MAX_INT_LENGTH 9
 #define MASK_GET_NUM 0xF
-void
+#define LIMIT 255
 ExceptionHandler(ExceptionType which)
 {
     int type = machine->ReadRegister(2);
@@ -68,14 +68,76 @@ ExceptionHandler(ExceptionType which)
 					DEBUG('a', "Read integer number from console.\n");
 					int number = 0;
 					int nDigit = 0;
+					int i;
 					char* buffer = new char[MAX_INT_LENGTH];
 					nDigit = gSynchConsole->Read(buffer, MAX_INT_LENGTH);
-					for (unsigned int i = 0; i < nDigit; ++i)
+					i = buffer[0] == '-' ? 1:0 ;
+					for (; i < nDigit; ++i)
 					{
 						number = number*10 + (int) (buffer[i] & MASK_GET_NUM);
 					}
+					number = buffer[0] == '-' ? -number : number;
 					machine->WriteRegister(2, number);
-					printf("The number is %d", number);
+					/*printf("The number is %d", number);*/
+					delete buffer;
+				break;
+				case SC_PrintInt:
+					char s[MAX_INT_LENGTH], neg, tmp;
+					neg = '-';
+					int i, n, mid, sz;
+					i = n = 0;
+					DEBUG('a', "Read argument value at r4");
+					n = machine->ReadRegister(4);
+					if (n < 0)
+					{
+						gSynchConsole->Write(&neg,1);
+						n = -n;
+					}
+					do {
+						s[i++] = n%10 + '0';
+					}	while (( n /= 10) > 0);
+					sz = i;
+					s[sz] = '\n';
+					mid = i / 2;
+					while (i-->=mid)
+					{
+						tmp = s[sz-i-1];
+						s[sz-i-1] = s[i];
+						s[i] = tmp;
+					}
+					gSynchConsole->Write(s, sz);
+				break;
+				case SC_PrintChar:
+					char ch;
+					ch = (char) machine->ReadRegister(4);
+					gSynchConsole->Write(&ch, 1);
+				break;
+				case SC_ReadChar:
+					int sz;
+					char buff[MAX_INT_LENGTH];
+					sz = gSynchConsole->Read(buff, MAX_INT_LENGTH);
+					machine->WriteRegister(2, buff[sz-1]);
+				break;
+				case SC_PrintString:
+					int length = machine->ReadRegister(5);
+					int i = 0;
+					char* buff = machine->User2System(buffAddr, LIMIT);
+					while (buff[i] != 0 && buff[i] != '\n')
+					{
+						gSynchConsole->Write(buff+i, 1);
+						i++;
+					};
+					buff[i] = '\n';
+					gSynchConsole->Write(buff+i,1);
+				break;
+				case SC_ReadString:
+					char *buff = new char[LIMIT];
+					if (buff == NULL) break;
+					int length = machine->ReadRegister(5);
+					int buffAddrUser = machine->ReadRegister(4);
+					gSynchConsole->Read(buffer, length);
+					machine->System2User(buffAddrUser, length, buffer);
+					int i = 0;
 				break;
 			}
     // Advance program counters.
