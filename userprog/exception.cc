@@ -136,7 +136,7 @@ void ExceptionHandler(ExceptionType which)
 					}
 					buff[i] = '\n';
 					gSynchConsole->Write(buff+i,1);
-					delete buff;
+					delete[] buff;
 				}
 				break;
 				case SC_ReadString:
