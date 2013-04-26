@@ -142,10 +142,8 @@ FileSystem::FileSystem(bool format)
     }
 	this->Create("stdin",0);
 	this->Create("stdout",0);
-	OpenFile* stdin = this->Open("stdin", 2);
-	OpenFile* stdout = this->Open("stdout", 3);
-	delete stdin;
-	delete stdout;
+	OpenFileID stdin = this->Open("stdin", 2);
+	OpenFileID stdout = this->Open("stdout", 3);
 }
 
 //----------------------------------------------------------------------
@@ -246,7 +244,7 @@ FileSystem::Open(char *name)
     return openFile;				// return NULL if not found
 }
 
-OpenFileID FileSysten::Open(char *name, int type)
+OpenFileID FileSystem::Open(char *name, int type)
 {
      Directory *directory = new Directory(NumDirEntries);
     OpenFile *openFile = NULL;
@@ -256,9 +254,9 @@ OpenFileID FileSysten::Open(char *name, int type)
     directory->FetchFrom(directoryFile);
     sector = directory->Find(name); 
     if (sector >= 0) 		
-	openFile = new OpenFile(sector, type);	// name was found in directory 
+		openFile = new OpenFile(sector, type);	// name was found in directory 
     delete directory;
-    return openFile;	
+    return sector;	
 }
 
 //----------------------------------------------------------------------

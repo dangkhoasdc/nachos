@@ -6,17 +6,17 @@ int main(int argc, char* argv[])
 {
 	OpenFileID srcId;
 	OpenFileID dstId;
-	unsigned int srcsz, i;
-	char c,
-	if ( (srcId= OpenFile(argv[1], 1)) != 0)
+	int filesz,srcsz, i;
+	char c;
+	if ( (srcId= OpenFileFunc(argv[1], 1)) != 0)
 	{
-		PrintString("Can not open file %s\n", argv[1]);
+		PrintString("Can not open file \n");
 		return 0;
 	}
-	if ((dstId = OpenFile(argv[2], 0)) != 0)
+	if ((dstId = OpenFileFunc(argv[2], 0)) != 0)
 	{
-		PrintString("Can not open file %s\n", argv[2]);
-		PrintStirng("Try to create file %s\n", argv[2]);
+		PrintString("Can not open file \n");
+		PrintString("Try to create file\n");
 		if (CreateFile(argv[2]) == 0)
 		{
 			PrintString("Create Successfully\n");

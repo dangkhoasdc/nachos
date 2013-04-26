@@ -37,7 +37,7 @@
 
 #include "copyright.h"
 #include "openfile.h"
-typedef OpenFile* OpenFileID;
+typedef int OpenFileID;
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
@@ -59,7 +59,13 @@ class FileSystem {
 	  if (fileDescriptor == -1) return NULL;
 	  return new OpenFile(fileDescriptor);
       }
+    OpenFileID Open(char *name, int type) {
+	  int fileDescriptor = OpenForReadWrite(name, FALSE);
 
+	  if (fileDescriptor == -1) return -1;
+	  return fileDescriptor;
+     }
+		
     bool Remove(char *name) { return Unlink(name) == 0; }
 
 };

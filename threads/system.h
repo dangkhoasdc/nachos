@@ -15,6 +15,7 @@
 #include "interrupt.h"
 #include "stats.h"
 #include "timer.h"
+#include "openfile.h"
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
 						// called before anything else
@@ -36,6 +37,7 @@ extern SynchConsole* gSynchConsole; // the simulate console
 
 #ifdef FILESYS_NEEDED 		// FILESYS or FILESYS_STUB 
 #include "filesys.h"
+#include "openfile.h"
 extern FileSystem  *fileSystem;
 #endif
 

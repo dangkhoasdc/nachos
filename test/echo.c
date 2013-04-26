@@ -6,8 +6,8 @@
 int main(int argc, char* argv[])
 {
 	char mess[255];
-	OpenFileID inConsole = OpenFile("stdin", 0);
-	OpenFileID outConsole = OpenFile("stdout", 1);
+	OpenFileID inConsole = OpenFileFunc("stdin", 0);
+	OpenFileID outConsole = OpenFileFunc("stdout", 1);
 	while(1)
 	{
 		ReadFile(mess, 255, inConsole);

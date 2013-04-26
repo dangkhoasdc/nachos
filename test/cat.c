@@ -6,10 +6,10 @@ int main(int argc, char* argv[])
 {
 	OpenFileID fileId;
 	unsigned int filesz, i;
-	char c,
-	if ( (fileId= OpenFile(argv[1], 1)) != 0)
+	char c;
+	if ( (fileId= OpenFileFunc(argv[1], 1)) != 0)
 	{
-		PrintString("Can not open file %s\n", argv[1]);
+		PrintString("Can not open file ");
 		return 0;
 	}
 	filesz = SeekFile(-1, fileId);

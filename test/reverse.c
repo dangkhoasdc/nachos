@@ -6,13 +6,13 @@
 int main(int argc, char* argv[])
 {
 	char c;
-	OpenFile srcId = OpenFile(argv[1], 1);
-	OpenFile dstId = OpenFile(argv[2], 0);
+	OpenFileID srcId = OpenFileFunc(argv[1], 1);
+	OpenFileID dstId = OpenFileFunc(argv[2], 0);
 	unsigned int srcSz, srcPos;
 	if (srcId != 0 || dstId != 0)
 	{
 		int errorId = srcId == 0 ? 1 : 2;
-		PrintString("Can not open file %s\n", argv[errorId]);
+		PrintString("Can not open file \n");
 		PrintString("Terminate program\n");
 		return 0;
 	}

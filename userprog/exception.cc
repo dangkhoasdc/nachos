@@ -159,11 +159,11 @@ void ExceptionHandler(ExceptionType which)
 					if (fileSystem->Create(buf, 0) == false)
 					{
 						DEBUG('f',"can not create file");
-						machine->WriteRegister(2, 0);
+						machine->WriteRegister(2, -1);
 					} else 
 					{
 						DEBUG('f',"create file successfully");
-						machine->WriteRegister(2, -1);
+						machine->WriteRegister(2, 0);
 					};
 					delete [] buf;
 					break;
@@ -171,15 +171,14 @@ void ExceptionHandler(ExceptionType which)
 				case SC_OpenFileID:
 				{
 					int bufAddr = machine->ReadRegister(4); // read string pointer from user
-					int typeOpenFile = machine->ReadRegister(5);
-					OpenFile* file = NULL;
+					OpenFileID fileOpen = -1;
 					char *buf = new char[LIMIT];
 					buf = machine->User2System(bufAddr, LIMIT);
 					// create a new file 
-					if ((file = fileSystem->Open(buf, 0)) != NULL)
+					if ((fileOpen = fileSystem->Open(buf, 0)) != -1)
 					{
 						DEBUG('f',"can not create file");
-						machine->WriteRegister(2, file);
+						machine->WriteRegister(2, fileOpen);
 					} else 
 					{
 						DEBUG('f',"create file successfully");
@@ -190,25 +189,26 @@ void ExceptionHandler(ExceptionType which)
 				}
 				case SC_CloseFile:
 				{
-					OpenFile* file = (OpenFile*) machine->ReadRegister(4);
-					delete file;
+					OpenFileID fileOpen = machine->ReadRegister(4);
+					OpenFile* fileClose = new OpenFile(fileOpen);
+					delete fileClose;
 					break;
 				}
 				case SC_ReadFile:
 				{
 					int bufAddr = machine->ReadRegister(4);
 					int NumBuf = machine->ReadRegister(5);
-					OpenFile* file = machine->ReadRegister(6);
-					int OldPos = file->GetCurrentPos();
+					OpenFile fileOpen(machine->ReadRegister(6));
+					int OldPos = fileOpen.GetCurrentPos();
 					int NewPos;
 					int i = 0;
 					char *buf = new char[NumBuf];
 					buf = machine->User2System(bufAddr, NumBuf);
 					
-					if ((file->Read(buf, NumBuf) - OldPos) > 0)
+					if ((fileOpen.Read(buf, NumBuf) - OldPos) > 0)
 					{
 						// Copy data from kernel to user space
-						NewPos = file->GetCurrentPos();
+						NewPos = fileOpen.GetCurrentPos();
 						machine->System2User(bufAddr, NumBuf, buf);
 						machine->WriteRegister(2, NewPos - OldPos + 1);
 						delete[] buf;
@@ -216,10 +216,10 @@ void ExceptionHandler(ExceptionType which)
 					};
 					// read data from console 
 					
-					if (file->type == 2)
+					if (fileOpen.type == 2)
 					{
 						int sz = gSynchConsole->Read(buf, NumBuf);
-						machine->System2User(bufAddrUser, sz, buf);
+						machine->System2User(bufAddr, sz, buf);
 					}
 					machine->WriteRegister(2, -1);
 					delete[] buf;
@@ -230,25 +230,23 @@ void ExceptionHandler(ExceptionType which)
 					
 					int bufAddr = machine->ReadRegister(4);
 					int NumBuf = machine->ReadRegister(5);
-					OpenFile* file = machine->ReadRegister(6);
-					int OldPos = file->GetCurrentPos();
+					OpenFile fileOpen(machine->ReadRegister(6));
+					int OldPos = fileOpen.GetCurrentPos();
 					int NewPos;
 					char *buf = new char[NumBuf];
 					
 					// type must equals '1'
 					buf = machine->User2System(bufAddr, NumBuf);
-					if (((file->Write(buf, NumBuf) - OldPos) > 0) 
-							&&	(file->type  == 1))
+					if (((fileOpen.Write(buf, NumBuf) - OldPos) > 0) 
+							&&	(fileOpen.type  == 1))
 					{
 						// Copy data from kernel to user space
-						NewPos = file->GetCurrentPos();
+						NewPos = fileOpen.GetCurrentPos();
 						machine->WriteRegister(2, NewPos - OldPos + 1);
 					
-						delete[] buf;
-						break;
 					}
 					// Write data to console
-					if (file->type == 3)
+					if (fileOpen.type == 3)
 					{
 						int i = 0;
 						while (buf[i] != 0 && buf[i] != '\n')
@@ -259,7 +257,6 @@ void ExceptionHandler(ExceptionType which)
 						buf[i] = '\n';
 						gSynchConsole->Write(buf+i,1);
 						machine->WriteRegister(2, i-1);
-						delete[] buf;
 					}
 					machine->WriteRegister(2, -1);
 					delete[] buf;
@@ -268,15 +265,16 @@ void ExceptionHandler(ExceptionType which)
 				case SC_SeekFile:
 				{
 					int pos = machine->ReadRegister(4);
-					OpenFile* file = (OpenFile*) machine->ReadRegister(5);
+					OpenFile fileOpen(machine->ReadRegister(5));
 					
-					if (pos > file->Length()) {
+					if (pos > fileOpen.Length()) {
 						machine->WriteRegister(2, -1);
-						break;
+					} else 
+					{
+						pos = pos == -1 ? fileOpen.Length() : pos;
+						fileOpen.Seek(pos);
+						machine->WriteRegister(2, fileOpen.GetCurrentPos());
 					}
-					pos = pos == -1 ? file->Length() : pos;
-					file->Seek(pos);
-					machine->WriteRegister(2, file->GetCurrentPos());
 					break;
 				}
 			}
