@@ -37,7 +37,7 @@
 
 #include "copyright.h"
 #include "openfile.h"
-
+typedef OpenFile* OpenFileID;
 #ifdef FILESYS_STUB 		// Temporarily implement file system calls as 
 				// calls to UNIX, until the real file system
 				// implementation is available
@@ -78,7 +78,7 @@ class FileSystem {
 					// Create a file (UNIX creat)
 
     OpenFile* Open(char *name); 	// Open a file (UNIX open)
-
+	OpenFileID Open(char *name, int type);
     bool Remove(char *name);  		// Delete a file (UNIX unlink)
 
     void List();			// List all the files in the file system

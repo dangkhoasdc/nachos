@@ -64,9 +64,11 @@ class FileHeader;
 class OpenFile {
   public:
     OpenFile(int sector);		// Open a file whose header is located
+    OpenFile(int sector, int type);		// Open a file whose header is located
+					// type: 0 : only read. 1: read and write.	
 					// at "sector" on the disk
     ~OpenFile();			// Close the file
-
+		void Close(int sector);
     void Seek(int position); 		// Set the position from which to 
 					// start reading/writing -- UNIX lseek
 
@@ -84,9 +86,17 @@ class OpenFile {
     int Length(); 			// Return the number of bytes in the
 					// file (this interface is simpler 
 					// than the UNIX idiom -- lseek to 
-					// end of file, tell, lseek back 
-    
+					// end of file, tell, lseek back
+	int GetCurrentPos()
+	{
+		return seekPosition;
+	}
+    int type; // type 0: only read
+			// type 1 : read and write
+			// type 2 : stdout
+			// type 3 : stdin
   private:
+		
     FileHeader *hdr;			// Header for this file 
     int seekPosition;			// Current position within the file
 };

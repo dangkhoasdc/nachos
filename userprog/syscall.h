@@ -38,6 +38,13 @@
 #define SC_PrintChar 14
 #define SC_ReadString 15
 #define SC_PrintString 16
+// File macro
+#define	SC_CreateFile	17			/* Create file  */
+#define	SC_OpenFileID	18			/* Create file  */
+#define	SC_ReadFile	19			/* Create file  */
+#define	SC_SeekFile	20			/* Create file  */
+#define SC_CloseFile 21
+#define	SC_WriteFile	22			/* Create file  */
 
 #ifndef IN_ASM
 
@@ -144,6 +151,18 @@ void PrintChar(char _ch);
 void ReadString(char buff[], int length);
 /*Print string  number to console*/
 void PrintString(char buff[]);
+/*Print string  number to console*/
+void CreateFile(char name[]);
+/*Open file*/
+void OpenFile(char name[], int type);
+/* Read file*/
+void ReadFile(char name[], int charcount, OpenFileID FileID);
+/*Seek file*/
+void SeekFile(int pos, OpenFileID FileID);
+/*Close file*/
+void CloseFile(OpenFileID openfile);
+/*Write data to file*/
+void WriteFile(OpenFileID openfile);
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */
