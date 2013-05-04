@@ -156,13 +156,13 @@ int CreateFile(char name[]);
 /*Open file*/
 OpenFileID OpenFileFunc(char name[], int type);
 /* Read file*/
-int ReadFile(char name[], int charcount, OpenFileID FileID);
+int ReadFile(char* name, int charcount, OpenFileID FileID);
 /*Seek file*/
 int SeekFile(int pos, OpenFileID FileID);
 /*Close file*/
 void CloseFile(OpenFileID openfile);
 /*Write data to file*/
-int WriteFile(char name[], int charcount,OpenFileID openfile);
+int WriteFile(char* name, int charcount,OpenFileID openfile);
 #endif /* IN_ASM */
 
 #endif /* SYSCALL_H */

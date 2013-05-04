@@ -47,13 +47,15 @@
 //	"which" is the kind of exception.  The list of possible exceptions 
 //	are in machine.h.
 //----------------------------------------------------------------------
+#define MAX_FILE_HANDLER 10
 void ExceptionHandler(ExceptionType which)
 {
-    int type = machine->ReadRegister(2);
+
+    int Systype = machine->ReadRegister(2);
     switch (which)
     {
 		case SyscallException:
-		switch (type)
+		switch (Systype)
 			{
 				case SC_Halt:
 					DEBUG('a', "Shutdown, initiated by user program.\n");
@@ -171,17 +173,23 @@ void ExceptionHandler(ExceptionType which)
 				case SC_OpenFileID:
 				{
 					int bufAddr = machine->ReadRegister(4); // read string pointer from user
-					OpenFileID fileOpen = -1;
+					int type = machine->ReadRegister(5);
 					char *buf = new char[LIMIT];
-					buf = machine->User2System(bufAddr, LIMIT);
-					// create a new file 
-					if ((fileOpen = fileSystem->Open(buf, 0)) != -1)
+					if (fileSystem->index > 10)
 					{
-						DEBUG('f',"can not create file");
-						machine->WriteRegister(2, fileOpen);
+						machine->WriteRegister(2, -1);
+						delete[] buf;
+						break;
+					}
+					buf = machine->User2System(bufAddr, LIMIT);
+					if ((fileSystem->openf[fileSystem->index] = fileSystem->Open(buf, type)) != NULL)
+					{
+						DEBUG('f',"open file successfully");
+						machine->WriteRegister(2, fileSystem->index);
+
 					} else 
 					{
-						DEBUG('f',"create file successfully");
+						DEBUG('f',"can not open file");
 						machine->WriteRegister(2, -1);
 					};
 					delete [] buf;
@@ -189,64 +197,114 @@ void ExceptionHandler(ExceptionType which)
 				}
 				case SC_CloseFile:
 				{
-					OpenFileID fileOpen = machine->ReadRegister(4);
-					OpenFile* fileClose = new OpenFile(fileOpen);
-					delete fileClose;
+					int m_index = machine->ReadRegister(4);
+					if (fileSystem->openf[m_index] == NULL) break;
+					delete fileSystem->openf[m_index];
 					break;
 				}
 				case SC_ReadFile:
 				{
 					int bufAddr = machine->ReadRegister(4);
 					int NumBuf = machine->ReadRegister(5);
-					OpenFile fileOpen(machine->ReadRegister(6));
-					int OldPos = fileOpen.GetCurrentPos();
+					int m_index = machine->ReadRegister(6);	
+					int OldPos;
 					int NewPos;
-					int i = 0;
 					char *buf = new char[NumBuf];
-					buf = machine->User2System(bufAddr, NumBuf);
-					
-					if ((fileOpen.Read(buf, NumBuf) - OldPos) > 0)
+					int i = 0;
+					// Check m_index
+					if (m_index < 0 || m_index > 10)
 					{
-						// Copy data from kernel to user space
-						NewPos = fileOpen.GetCurrentPos();
-						machine->System2User(bufAddr, NumBuf, buf);
-						machine->WriteRegister(2, NewPos - OldPos + 1);
+						machine->WriteRegister(2, -1);
 						delete[] buf;
 						break;
-					};
+					}
+					// check openf[m_index]
+					if (fileSystem->openf[m_index] == NULL)
+					{
+						machine->WriteRegister(2, -1);
+						delete[] buf;
+						break;
+					}
+					OldPos = fileSystem->openf[m_index]->GetCurrentPos();
+					buf = machine->User2System(bufAddr, NumBuf);
+					if (fileSystem->openf[m_index]->type == 2)
+					{
+						/*  printf("NumBuf = %d\n", NumBuf);*/
+						int sz = gSynchConsole->Read(buf, NumBuf);
+						/*  machine->System2User(bufAddr, sz, buf);*/
+						machine->WriteRegister(2, sz);
+						
+					}
+					
+					if ((fileSystem->openf[m_index]->Read(buf, NumBuf) ) > 0)
+					{
+						// Copy data from kernel to user space
+					  NewPos = fileSystem->openf[m_index]->GetCurrentPos();
+						machine->System2User(bufAddr, NewPos - OldPos +1, buf);
+						machine->WriteRegister(2, NewPos - OldPos + 1);
+					}
+					else
+					{
+						machine->WriteRegister(2, -1);
+						delete[] buf;
+						break;
+					}
 					// read data from console 
 					
+					/*  
 					if (fileOpen.type == 2)
 					{
 						int sz = gSynchConsole->Read(buf, NumBuf);
 						machine->System2User(bufAddr, sz, buf);
-					}
-					machine->WriteRegister(2, -1);
+						machine->WriteRegister(2, sz);
+					}*/
 					delete[] buf;
 					break;
 				}
 				case SC_WriteFile:
 				{
-					
 					int bufAddr = machine->ReadRegister(4);
 					int NumBuf = machine->ReadRegister(5);
-					OpenFile fileOpen(machine->ReadRegister(6));
-					int OldPos = fileOpen.GetCurrentPos();
+					int m_index =  machine->ReadRegister(6);
+					int OldPos;
 					int NewPos;
 					char *buf = new char[NumBuf];
+					// Check m_index
+					if (m_index < 0 || m_index > 10)
+					{
+						machine->WriteRegister(2, -1);
+						delete[] buf;
+						break;
+					}
+					// check openf[m_index]
+					if (fileSystem->openf[m_index] == NULL)
+					{
+						machine->WriteRegister(2, -1);
+						delete[] buf;
+						break;
+					}
+					OldPos = fileSystem->openf[m_index]->GetCurrentPos();
 					
 					// type must equals '1'
 					buf = machine->User2System(bufAddr, NumBuf);
-					if (((fileOpen.Write(buf, NumBuf) - OldPos) > 0) 
-							&&	(fileOpen.type  == 1))
+					if (fileSystem->openf[m_index]->type  == 0 || fileSystem->openf[m_index]->type == 2)
+					{	
+					if ((fileSystem->openf[m_index]->Write(buf, NumBuf)) > 0) 
 					{
 						// Copy data from kernel to user space
-						NewPos = fileOpen.GetCurrentPos();
+						printf("%s",buf);
+						NewPos = fileSystem->openf[m_index]->GetCurrentPos();
 						machine->WriteRegister(2, NewPos - OldPos + 1);
-					
+					}
+					else
+					{
+						machine->WriteRegister(2, -1);
+						delete[] buf;
+						break;
+					}
 					}
 					// Write data to console
-					if (fileOpen.type == 3)
+					if (fileSystem->openf[m_index]->type == 3)
 					{
 						int i = 0;
 						while (buf[i] != 0 && buf[i] != '\n')
@@ -258,22 +316,33 @@ void ExceptionHandler(ExceptionType which)
 						gSynchConsole->Write(buf+i,1);
 						machine->WriteRegister(2, i-1);
 					}
-					machine->WriteRegister(2, -1);
 					delete[] buf;
 					break;
 				}
 				case SC_SeekFile:
 				{
 					int pos = machine->ReadRegister(4);
-					OpenFile fileOpen(machine->ReadRegister(5));
-					
-					if (pos > fileOpen.Length()) {
+					int m_index = machine->ReadRegister(5);
+					if (m_index < 0 || m_index > 10)
+					{
+						machine->WriteRegister(2, -1);
+						break;
+					}
+					// check openf[m_index]
+					if (fileSystem->openf[m_index] == NULL)
+					{
+						printf("seek fail \n");
+						machine->WriteRegister(2, -1);
+						break;
+					}
+						
+						pos = (pos == -1) ? fileSystem->openf[m_index]->Length() : pos;
+					if (pos > fileSystem->openf[m_index]->Length() || pos < 0) {
 						machine->WriteRegister(2, -1);
 					} else 
 					{
-						pos = pos == -1 ? fileOpen.Length() : pos;
-						fileOpen.Seek(pos);
-						machine->WriteRegister(2, fileOpen.GetCurrentPos());
+						fileSystem->openf[m_index]->Seek(pos);
+						machine->WriteRegister(2, pos);
 					}
 					break;
 				}
@@ -285,27 +354,27 @@ void ExceptionHandler(ExceptionType which)
     machine->registers[NextPCReg] += 4;
 		break;
 	case  PageFaultException:    // No valid translation found
-		printf("No valid translation found %d %d\n", which, type);
+		printf("No valid translation found %d %d\n", which, Systype);
 		ASSERT(FALSE);
 		break;
 	case  ReadOnlyException:     // Write attempted to page marked 
-		printf("Write attempted tp page marked %d %d\n", which, type);
+		printf("Write attempted tp page marked %d %d\n", which, Systype);
 		ASSERT(FALSE);
 		break;
 	case  BusErrorException:     // Translation resulted in an 
-		printf("Translaion resulted in an %d %d\n", which, type);
+		printf("Translaion resulted in an %d %d\n", which, Systype);
 		ASSERT(FALSE);
 		break;
 	case  AddressErrorException: // Unaligned reference or one that
-		printf("Unaligned reference or one that %d %d\n", which, type);
+		printf("Unaligned reference or one that %d %d\n", which, Systype);
 		ASSERT(FALSE);
 		break;
 	case  OverflowException:     // Integer overflow in add or sub.
-		printf("Integer overflow in add or sub %d %d\n", which, type);
+		printf("Integer overflow in add or sub %d %d\n", which, Systype);
 		ASSERT(FALSE);
 		break;
 	case  IllegalInstrException: // Unimplemented or reserved instr.
-		printf("Unimplemented or reserved instr %d %d\n", which, type);
+		printf("Unimplemented or reserved instr %d %d\n", which, Systype);
 		ASSERT(FALSE);
 		break;
    }

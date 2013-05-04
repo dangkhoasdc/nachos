@@ -7,18 +7,24 @@ int main(int argc, char* argv[])
 	OpenFileID fileId;
 	unsigned int filesz, i;
 	char c;
-	if ( (fileId= OpenFileFunc(argv[1], 1)) != 0)
+	char name[255];
+	PrintString("Input file name:");
+	ReadString(name, 255);
+	if ( (fileId= OpenFileFunc(name, 1)) == -1)
 	{
 		PrintString("Can not open file ");
 		return 0;
 	}
 	filesz = SeekFile(-1, fileId);
 	i = 0;
+	
+	SeekFile(0, fileId);
+	
 	for (; i < filesz; ++i)
 	{
 		ReadFile(&c, 1, fileId);
 		PrintChar(c);
-	}
+	} 
 	CloseFile(fileId);
 	return 0;
 }

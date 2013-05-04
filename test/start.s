@@ -186,13 +186,13 @@ CreateFile:
 	j $31
 	.end CreateFile
 
-	.globl OpenFileFuncID
-	.ent OpenFileFuncID
-OpenFileFuncID:
+	.globl OpenFileFunc
+	.ent OpenFileFunc
+OpenFileFunc:
 	addiu $2, $0, SC_OpenFileID
 	syscall
 	j $31
-	.end OpenFileFuncID
+	.end OpenFileFunc
 
 	.globl ReadFile
 	.ent ReadFile
