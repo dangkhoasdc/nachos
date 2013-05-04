@@ -55,8 +55,16 @@ class FileSystem {
 	this->Create("stdin",0);
 	this->Create("stdout",0);
 	openf[index++] = this->Open("stdin",2);
-	openf[index++] = this->Open("stdout",2);
+	openf[index++] = this->Open("stdout",3);
 		}
+	~FileSystem()
+	{
+	for (int i = 0; i < 10; ++i)
+	{
+		if (openf[i] != NULL) delete openf[i];
+	}
+	delete[] openf;
+	}
     bool Create(char *name, int initialSize) { 
 	int fileDescriptor = OpenForWrite(name);
 
@@ -69,12 +77,14 @@ class FileSystem {
 	  int fileDescriptor = OpenForReadWrite(name, FALSE);
 
 	  if (fileDescriptor == -1) return NULL;
+		index++;
 	  return new OpenFile(fileDescriptor);
       }
     OpenFile* Open(char *name, int type) {
 	  int fileDescriptor = OpenForReadWrite(name, FALSE);
 
 	  if (fileDescriptor == -1) return NULL;
+		index++;
 	  return new OpenFile(fileDescriptor, type);
      }
 		

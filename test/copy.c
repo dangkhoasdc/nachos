@@ -6,21 +6,25 @@ int main(int argc, char* argv[])
 {
 	OpenFileID srcId;
 	OpenFileID dstId;
+	char source[255], dest[255];
 	int filesz,srcsz, i;
 	char c;
-	if ( (srcId= OpenFileFunc(argv[1], 1)) != 0)
+	
+	PrintString("Input source file:");
+	ReadString(source, 255);
+	PrintString("Input destination file:");
+	ReadString(dest, 255);
+	PrintString(source);
+
+	srcId = OpenFileFunc(source, 1);
+	CreateFile(dest);
+	dstId = OpenFileFunc(dest, 0);
+	if (srcId == -1 || dstId == -1)
 	{
+		int errorId = srcId == 0 ? 1 : 2;
 		PrintString("Can not open file \n");
+		PrintString("Terminate program\n");
 		return 0;
-	}
-	if ((dstId = OpenFileFunc(argv[2], 0)) != 0)
-	{
-		PrintString("Can not open file \n");
-		PrintString("Try to create file\n");
-		if (CreateFile(argv[2]) == 0)
-		{
-			PrintString("Create Successfully\n");
-		}
 	}
 	filesz = SeekFile(-1, srcId);
 	SeekFile(0, srcId);

@@ -5,7 +5,7 @@
 int main(int argc, char* argv[])
 {
 	OpenFileID fileId;
-	unsigned int filesz, i;
+	int filesz, i;
 	char c;
 	char name[255];
 	PrintString("Input file name:");
@@ -17,7 +17,6 @@ int main(int argc, char* argv[])
 	}
 	filesz = SeekFile(-1, fileId);
 	i = 0;
-	
 	SeekFile(0, fileId);
 	
 	for (; i < filesz; ++i)

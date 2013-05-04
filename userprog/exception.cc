@@ -48,6 +48,7 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 #define MAX_FILE_HANDLER 10
+#include "string.h"
 void ExceptionHandler(ExceptionType which)
 {
 
@@ -182,11 +183,22 @@ void ExceptionHandler(ExceptionType which)
 						break;
 					}
 					buf = machine->User2System(bufAddr, LIMIT);
+					if (strcmp(buf,"stdin") == 0)
+					{
+						printf("stdin mode\n");
+						machine->WriteRegister(2, 0);
+						break;
+					}
+					if (strcmp(buf,"stdout") == 0)
+					{
+						printf("stdout mode\n");
+						machine->WriteRegister(2, 1);
+						break;
+					}
 					if ((fileSystem->openf[fileSystem->index] = fileSystem->Open(buf, type)) != NULL)
 					{
 						DEBUG('f',"open file successfully");
-						machine->WriteRegister(2, fileSystem->index);
-
+						machine->WriteRegister(2, fileSystem->index-1);
 					} else 
 					{
 						DEBUG('f',"can not open file");
@@ -200,6 +212,7 @@ void ExceptionHandler(ExceptionType which)
 					int m_index = machine->ReadRegister(4);
 					if (fileSystem->openf[m_index] == NULL) break;
 					delete fileSystem->openf[m_index];
+					fileSystem->openf[m_index] = NULL;
 					break;
 				}
 				case SC_ReadFile:
@@ -232,8 +245,10 @@ void ExceptionHandler(ExceptionType which)
 						/*  printf("NumBuf = %d\n", NumBuf);*/
 						int sz = gSynchConsole->Read(buf, NumBuf);
 						/*  machine->System2User(bufAddr, sz, buf);*/
+					
+						machine->System2User(bufAddr, sz, buf);
 						machine->WriteRegister(2, sz);
-						
+						break;
 					}
 					
 					if ((fileSystem->openf[m_index]->Read(buf, NumBuf) ) > 0)
@@ -285,9 +300,9 @@ void ExceptionHandler(ExceptionType which)
 					}
 					OldPos = fileSystem->openf[m_index]->GetCurrentPos();
 					
-					// type must equals '1'
+					// type must equals '0'
 					buf = machine->User2System(bufAddr, NumBuf);
-					if (fileSystem->openf[m_index]->type  == 0 || fileSystem->openf[m_index]->type == 2)
+					if (fileSystem->openf[m_index]->type  == 0 || fileSystem->openf[m_index]->type == 3)
 					{	
 					if ((fileSystem->openf[m_index]->Write(buf, NumBuf)) > 0) 
 					{
@@ -296,7 +311,7 @@ void ExceptionHandler(ExceptionType which)
 						NewPos = fileSystem->openf[m_index]->GetCurrentPos();
 						machine->WriteRegister(2, NewPos - OldPos + 1);
 					}
-					else
+					else if (fileSystem->openf[m_index]->type == 1);
 					{
 						machine->WriteRegister(2, -1);
 						delete[] buf;
@@ -307,6 +322,7 @@ void ExceptionHandler(ExceptionType which)
 					if (fileSystem->openf[m_index]->type == 3)
 					{
 						int i = 0;
+						printf("stdout mode\n");
 						while (buf[i] != 0 && buf[i] != '\n')
 						{
 							gSynchConsole->Write(buf+i, 1);
@@ -335,7 +351,6 @@ void ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						break;
 					}
-						
 						pos = (pos == -1) ? fileSystem->openf[m_index]->Length() : pos;
 					if (pos > fileSystem->openf[m_index]->Length() || pos < 0) {
 						machine->WriteRegister(2, -1);
