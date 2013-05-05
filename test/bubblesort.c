@@ -21,7 +21,7 @@ int main()
 {
 	int n, i, j, tmp;
 	int arr[100];
-	PrintString("Nhap mang duoi 1000 phan tu:");
+	PrintString("Nhap mang duoi 100 phan tu:");
 	n = ReadInt();
 	for (i = 0; i < n; i++) {
 		arr[i] = ReadInt();
